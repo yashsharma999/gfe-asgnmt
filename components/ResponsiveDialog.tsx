@@ -20,12 +20,14 @@ interface ResponsiveDialogProps {
   open: boolean;
   setOpen: any;
   children: React.ReactNode;
+  title: string;
 }
 
 export default function ResponsiveDialog({
   open,
   setOpen,
   children,
+  title,
 }: ResponsiveDialogProps) {
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
@@ -38,7 +40,7 @@ export default function ResponsiveDialog({
       >
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create Task</DialogTitle>
+            <DialogTitle>{title}</DialogTitle>
             <DialogDescription>Create task</DialogDescription>
           </DialogHeader>
           {children}

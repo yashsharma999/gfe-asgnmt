@@ -19,33 +19,57 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { v4 as uuidv4 } from 'uuid';
 
 const formSchema = z.object({
+  id: z.number(),
   title: z.string().min(1, 'Title is required'),
-  status: z.enum(['TODO', 'IN_PROGRESS', 'COMPLETED']),
-  priority: z.enum(['LOW', 'MEDIUM', 'HIGH']),
+  status: z.enum(['not_started', 'in_progress', 'completed']),
+  priority: z.enum(['none', 'low', 'medium', 'high', 'urgent']),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function CreateTaskForm() {
+interface TaskFormProps {
+  onSubmit: (data: any) => void;
+  initialData?: {
+    id: number;
+    title: string;
+    priority: 'none' | 'low' | 'medium' | 'high' | 'urgent';
+    status: 'not_started' | 'in_progress' | 'completed';
+  };
+  submitLabel?: string;
+}
+
+export default function TaskForm({
+  onSubmit,
+  initialData,
+  submitLabel = 'Create Task',
+}: TaskFormProps) {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      id: Math.random(),
       title: '',
-      status: 'TODO',
-      priority: 'MEDIUM',
+      status: 'not_started',
+      priority: 'medium',
     },
   });
 
-  function onSubmit(values: FormValues) {
+  React.useEffect(() => {
+    if (initialData) {
+      form.reset(initialData);
+    }
+  }, [initialData, form]);
+
+  function onSubmitForm(values: FormValues) {
     console.log(values);
-    // Handle form submission here
+    onSubmit(values);
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-6'>
+      <form onSubmit={form.handleSubmit(onSubmitForm)} className='space-y-6'>
         <FormField
           control={form.control}
           name='title'
@@ -66,16 +90,19 @@ export default function CreateTaskForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Status</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                onValueChange={(value) => value && field.onChange(value)}
+                value={field.value}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder='Select task status' />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value='TODO'>To Do</SelectItem>
-                  <SelectItem value='IN_PROGRESS'>In Progress</SelectItem>
-                  <SelectItem value='COMPLETED'>Completed</SelectItem>
+                  <SelectItem value='not_started'>Not Started</SelectItem>
+                  <SelectItem value='in_progress'>In Progress</SelectItem>
+                  <SelectItem value='completed'>Completed</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -89,16 +116,21 @@ export default function CreateTaskForm() {
           render={({ field }) => (
             <FormItem>
               <FormLabel>Priority</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
+              <Select
+                value={field.value}
+                onValueChange={(value) => value && field.onChange(value)}
+              >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder='Select task priority' />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value='LOW'>Low</SelectItem>
-                  <SelectItem value='MEDIUM'>Medium</SelectItem>
-                  <SelectItem value='HIGH'>High</SelectItem>
+                  <SelectItem value='none'>None</SelectItem>
+                  <SelectItem value='low'>Low</SelectItem>
+                  <SelectItem value='medium'>Medium</SelectItem>
+                  <SelectItem value='high'>High</SelectItem>
+                  <SelectItem value='urgent'>Urgent</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -106,7 +138,7 @@ export default function CreateTaskForm() {
           )}
         />
 
-        <Button type='submit'>Create Task</Button>
+        <Button type='submit'>{submitLabel}</Button>
       </form>
     </Form>
   );
