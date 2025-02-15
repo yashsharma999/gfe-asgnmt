@@ -10,6 +10,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from './ui/select';
+import { Dialog, DialogContent, DialogTrigger } from './ui/dialog';
+import { Checkbox } from './ui/checkbox';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 
 type SortDirection = 'asc' | 'desc' | null;
 type SortField = 'title' | 'priority' | 'status' | null;
@@ -21,8 +28,8 @@ interface SortState {
 
 interface FilterState {
   title: string;
-  priority: string;
-  status: string;
+  priority: string[];
+  status: string[];
 }
 
 interface PaginationState {
@@ -31,13 +38,14 @@ interface PaginationState {
 }
 
 const ALL_FILTER_VALUE = '_all_';
+const statuses = ['Todo', 'In Progress', 'Done'];
 
 export default function TaskTable({ tasks }: { tasks: any[] }) {
   const [sort, setSort] = useState<SortState>({ field: null, direction: null });
   const [filters, setFilters] = useState<FilterState>({
     title: '',
-    priority: ALL_FILTER_VALUE,
-    status: ALL_FILTER_VALUE,
+    priority: [],
+    status: [],
   });
   const [pagination, setPagination] = useState<PaginationState>({
     currentPage: 1,
@@ -63,16 +71,16 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
     return priorityOrder[priority.toLowerCase()] ?? -1;
   };
 
-  const filteredTasks = [...tasks].filter((task) => {
+  const filteredTasks = tasks.filter((task) => {
     const matchesTitle = task.title
       .toLowerCase()
       .includes(filters.title.toLowerCase());
     const matchesPriority =
-      filters.priority === ALL_FILTER_VALUE ||
-      task.priority.toLowerCase() === filters.priority;
+      filters.priority.length === 0 ||
+      filters.priority.includes(task.priority.toLowerCase());
     const matchesStatus =
-      filters.status === ALL_FILTER_VALUE ||
-      task.status.toLowerCase() === filters.status;
+      filters.status.length === 0 ||
+      filters.status.includes(task.status.toLowerCase());
 
     return matchesTitle && matchesPriority && matchesStatus;
   });
@@ -134,6 +142,34 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
     }));
   };
 
+  const handlePriorityChange = (priority: string, checked: boolean) => {
+    setFilters((prev) => {
+      let newPriorities = [...prev.priority];
+
+      if (checked) {
+        newPriorities.push(priority);
+      } else {
+        newPriorities = newPriorities.filter((p) => p !== priority);
+      }
+
+      return { ...prev, priority: newPriorities };
+    });
+  };
+
+  const handleStatusChange = (status: string, checked: boolean) => {
+    setFilters((prev) => {
+      let newStatuses = [...prev.status];
+
+      if (checked) {
+        newStatuses.push(status.toLowerCase());
+      } else {
+        newStatuses = newStatuses.filter((s) => s !== status.toLowerCase());
+      }
+
+      return { ...prev, status: newStatuses };
+    });
+  };
+
   return (
     <div className='space-y-4'>
       <div className='flex gap-4'>
@@ -145,45 +181,80 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
               setFilters((prev) => ({ ...prev, title: e.target.value }))
             }
             className='max-w-sm'
-            //prefix={<Search className='h-4 w-4 text-gray-400' />}
           />
         </div>
-        <Select
-          value={filters.priority}
-          onValueChange={(value) =>
-            setFilters((prev) => ({ ...prev, priority: value }))
-          }
-        >
-          <SelectTrigger className='w-[180px]'>
-            <SelectValue placeholder='Filter by priority' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL_FILTER_VALUE}>All priorities</SelectItem>
-            {priorities.map((priority) => (
-              <SelectItem key={priority} value={priority.toLowerCase()}>
-                {priority}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select
-          value={filters.status}
-          onValueChange={(value) =>
-            setFilters((prev) => ({ ...prev, status: value }))
-          }
-        >
-          <SelectTrigger className='w-[180px]'>
-            <SelectValue placeholder='Filter by status' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL_FILTER_VALUE}>All statuses</SelectItem>
-            {statuses.map((status) => (
-              <SelectItem key={status} value={status.toLowerCase()}>
-                {status}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant='outline' className='w-[180px] justify-between'>
+              Priority Filter
+              <span className='text-xs text-gray-500'>
+                {filters.priority.length > 0
+                  ? `(${filters.priority.length})`
+                  : ''}
+              </span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className='w-[180px] p-2'>
+            <div className='space-y-2'>
+              {priorities.map((priority) => (
+                <div key={priority} className='flex items-center space-x-2'>
+                  <Checkbox
+                    id={`priority-${priority}`}
+                    checked={filters.priority.includes(priority.toLowerCase())}
+                    onCheckedChange={(checked: any) =>
+                      handlePriorityChange(
+                        priority.toLowerCase(),
+                        checked as boolean
+                      )
+                    }
+                  />
+                  <label
+                    htmlFor={`priority-${priority}`}
+                    className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                  >
+                    {priority}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant='outline' className='w-[180px] justify-between'>
+              Status Filter
+              <span className='text-xs text-gray-500'>
+                {filters.status.length > 0 ? `(${filters.status.length})` : ''}
+              </span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className='w-[180px] p-2'>
+            <div className='space-y-2'>
+              {statuses.map((status) => (
+                <div key={status} className='flex items-center space-x-2'>
+                  <Checkbox
+                    id={`status-${status}`}
+                    checked={filters.status.includes(status.toLowerCase())}
+                    onCheckedChange={(checked: any) =>
+                      handleStatusChange(
+                        status.toLowerCase(),
+                        checked as boolean
+                      )
+                    }
+                  />
+                  <label
+                    htmlFor={`status-${status}`}
+                    className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                  >
+                    {status}
+                  </label>
+                </div>
+              ))}
+            </div>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className='rounded-md overflow-hidden border border-zinc-200'>
