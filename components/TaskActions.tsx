@@ -15,8 +15,8 @@ interface TaskActionsProps {
   task: {
     id: number;
     title: string;
-    priority: string;
-    status: string;
+    priority: any;
+    status: any;
   };
 }
 
