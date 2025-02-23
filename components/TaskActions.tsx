@@ -6,10 +6,11 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { Button } from './ui/button';
-import { Ellipsis } from 'lucide-react';
+import { Ellipsis, Plus } from 'lucide-react';
 import { useTaskStore } from '@/lib/store';
 import ResponsiveDialog from './ResponsiveDialog';
 import TaskForm from './task-form';
+import CustomFieldForm from './customFields/custom-field';
 
 interface TaskActionsProps {
   task: {
@@ -22,6 +23,7 @@ interface TaskActionsProps {
 
 export default function TaskActions({ task }: TaskActionsProps) {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [customFieldDialogOpen, setCustomFieldDialogOpen] = useState(false);
   const updateTask = useTaskStore((state) => state.updateTask);
   const deleteTask = useTaskStore((state) => state.deleteTask);
 
@@ -53,6 +55,12 @@ export default function TaskActions({ task }: TaskActionsProps) {
         <DropdownMenuContent align='end'>
           <DropdownMenuItem onClick={handleEdit}>Edit</DropdownMenuItem>
           <DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setCustomFieldDialogOpen(true)}>
+            <span>
+              <Plus />
+            </span>
+            Custom Field
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
@@ -66,6 +74,13 @@ export default function TaskActions({ task }: TaskActionsProps) {
           initialData={task}
           submitLabel='Update Task'
         />
+      </ResponsiveDialog>
+      <ResponsiveDialog
+        title={'Custom field'}
+        open={customFieldDialogOpen}
+        setOpen={setCustomFieldDialogOpen}
+      >
+        <CustomFieldForm task={task} />
       </ResponsiveDialog>
     </>
   );

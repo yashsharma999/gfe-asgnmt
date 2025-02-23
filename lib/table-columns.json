@@ -1,0 +1,23 @@
+[
+  {
+    "field": "title",
+    "label": "Task Title",
+    "type": "string",
+    "custom": false,
+    "defaultValue": ""
+  },
+  {
+    "field": "priority",
+    "label": "Priority",
+    "type": "string",
+    "custom": false,
+    "defaultValue": ""
+  },
+  {
+    "field": "status",
+    "label": "Status",
+    "type": "string",
+    "custom": false,
+    "defaultValue": ""
+  }
+]

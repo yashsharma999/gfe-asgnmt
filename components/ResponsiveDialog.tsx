@@ -21,6 +21,7 @@ interface ResponsiveDialogProps {
   setOpen: any;
   children: React.ReactNode;
   title: string;
+  description?: string;
 }
 
 export default function ResponsiveDialog({
@@ -28,6 +29,7 @@ export default function ResponsiveDialog({
   setOpen,
   children,
   title,
+  description,
 }: ResponsiveDialogProps) {
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
@@ -41,7 +43,7 @@ export default function ResponsiveDialog({
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
-            <DialogDescription>Create task</DialogDescription>
+            <DialogDescription>{description ?? ''}</DialogDescription>
           </DialogHeader>
           {children}
         </DialogContent>
@@ -52,10 +54,10 @@ export default function ResponsiveDialog({
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerContent>
         <DrawerHeader className='text-left'>
-          <DrawerTitle>Create Task</DrawerTitle>
-          <DrawerDescription>Create task</DrawerDescription>
+          <DrawerTitle>{title}</DrawerTitle>
+          <DrawerDescription>{description ?? ''}</DrawerDescription>
         </DrawerHeader>
-        <div className='px-4'>{children}</div>
+        <div className='px-4 pb-8'>{children}</div>
       </DrawerContent>
     </Drawer>
   );

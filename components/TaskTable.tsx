@@ -17,9 +17,15 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
+import { useStore } from 'zustand';
+import { useTaskStore } from '@/lib/store';
+import { boolean } from 'zod';
+import { fieldToLabel } from '@/lib/utils';
+import NewTask from './new-task';
+import CustomFieldManager from './customFields/manage-custom-fields';
 
 type SortDirection = 'asc' | 'desc' | null;
-type SortField = 'title' | 'priority' | 'status' | null;
+type SortField = any;
 
 interface SortState {
   field: SortField;
@@ -41,6 +47,8 @@ const ALL_FILTER_VALUE = '_all_';
 const statuses = ['Todo', 'In Progress', 'Done'];
 
 export default function TaskTable({ tasks }: { tasks: any[] }) {
+  const { tableColumns } = useTaskStore();
+  console.log('cols', tableColumns);
   const [sort, setSort] = useState<SortState>({ field: null, direction: null });
   const [filters, setFilters] = useState<FilterState>({
     title: '',
@@ -97,6 +105,10 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
     const aValue = a[sort.field];
     const bValue = b[sort.field];
 
+    // handle number sorting
+    if (typeof aValue === 'number' && typeof bValue === 'number') {
+      return sort.direction === 'asc' ? aValue - bValue : bValue - aValue;
+    }
     if (sort.direction === 'asc') {
       return aValue.localeCompare(bValue);
     } else {
@@ -171,126 +183,175 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
   };
 
   return (
-    <div className='space-y-4'>
-      <div className='flex gap-4'>
-        <div className='flex-1'>
-          <Input
-            placeholder='Filter by title...'
-            value={filters.title}
-            onChange={(e) =>
-              setFilters((prev) => ({ ...prev, title: e.target.value }))
-            }
-            className='max-w-sm'
-          />
+    <div className='space-y-2'>
+      <div className='flex flex-col md:flex-row md:justify-between md:items-center'>
+        <div className='flex gap-2 items-center flex-wrap'>
+          <div className=''>
+            <Input
+              placeholder='Filter by title...'
+              value={filters.title}
+              onChange={(e) =>
+                setFilters((prev) => ({ ...prev, title: e.target.value }))
+              }
+              className='max-w-[200px] h-8 text-sm'
+            />
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant='outline'
+                className='h-8 w-fit text-center border-dashed border-zinc-300'
+              >
+                Priority
+                {filters.priority.length > 0 && (
+                  <span className='text-xs text-gray-500'>
+                    {filters.priority.length > 0
+                      ? `(${filters.priority.length})`
+                      : ''}
+                  </span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className='w-[180px] p-2'>
+              <div className='space-y-2'>
+                {priorities.map((priority) => (
+                  <div key={priority} className='flex items-center space-x-2'>
+                    <Checkbox
+                      id={`priority-${priority}`}
+                      checked={filters.priority.includes(
+                        priority.toLowerCase()
+                      )}
+                      onCheckedChange={(checked: any) =>
+                        handlePriorityChange(
+                          priority.toLowerCase(),
+                          checked as boolean
+                        )
+                      }
+                    />
+                    <label
+                      htmlFor={`priority-${priority}`}
+                      className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                    >
+                      {priority}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant='outline'
+                className='h-8 w-fit justify-between border-dashed border-zinc-300'
+              >
+                Status
+                {filters.status.length > 0 && (
+                  <span className='text-xs text-gray-500'>
+                    {filters.status.length > 0
+                      ? `(${filters.status.length})`
+                      : ''}
+                  </span>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className='w-[180px] p-2'>
+              <div className='space-y-2'>
+                {statuses.map((status) => (
+                  <div key={status} className='flex items-center space-x-2'>
+                    <Checkbox
+                      id={`status-${status}`}
+                      checked={filters.status.includes(status.toLowerCase())}
+                      onCheckedChange={(checked: any) =>
+                        handleStatusChange(
+                          status.toLowerCase(),
+                          checked as boolean
+                        )
+                      }
+                    />
+                    <label
+                      htmlFor={`status-${status}`}
+                      className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
+                    >
+                      {status}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant='outline' className='w-[180px] justify-between'>
-              Priority Filter
-              <span className='text-xs text-gray-500'>
-                {filters.priority.length > 0
-                  ? `(${filters.priority.length})`
-                  : ''}
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className='w-[180px] p-2'>
-            <div className='space-y-2'>
-              {priorities.map((priority) => (
-                <div key={priority} className='flex items-center space-x-2'>
-                  <Checkbox
-                    id={`priority-${priority}`}
-                    checked={filters.priority.includes(priority.toLowerCase())}
-                    onCheckedChange={(checked: any) =>
-                      handlePriorityChange(
-                        priority.toLowerCase(),
-                        checked as boolean
-                      )
-                    }
-                  />
-                  <label
-                    htmlFor={`priority-${priority}`}
-                    className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-                  >
-                    {priority}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant='outline' className='w-[180px] justify-between'>
-              Status Filter
-              <span className='text-xs text-gray-500'>
-                {filters.status.length > 0 ? `(${filters.status.length})` : ''}
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className='w-[180px] p-2'>
-            <div className='space-y-2'>
-              {statuses.map((status) => (
-                <div key={status} className='flex items-center space-x-2'>
-                  <Checkbox
-                    id={`status-${status}`}
-                    checked={filters.status.includes(status.toLowerCase())}
-                    onCheckedChange={(checked: any) =>
-                      handleStatusChange(
-                        status.toLowerCase(),
-                        checked as boolean
-                      )
-                    }
-                  />
-                  <label
-                    htmlFor={`status-${status}`}
-                    className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-                  >
-                    {status}
-                  </label>
-                </div>
-              ))}
-            </div>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className='flex gap-2'>
+          <NewTask />
+          <CustomFieldManager />
+        </div>
       </div>
 
       <div className='rounded-md overflow-hidden border border-zinc-200'>
         <table className='min-w-full border-collapse text-sm'>
           <thead>
             <tr className='bg-gray-100'>
-              {[
-                { field: 'title' as const, label: 'Task Title' },
-                { field: 'priority' as const, label: 'Priority' },
-                { field: 'status' as const, label: 'Status' },
-              ].map(({ field, label }) => (
-                <th key={field} className='text-left p-2'>
-                  <Button
-                    variant='ghost'
-                    className='h-8 pl-0 flex items-center gap-1 font-medium'
-                    onClick={() => handleSort(field)}
-                  >
-                    {label}
-                    <ArrowUpDown
-                      className={`h-4 w-4 transition-all ${getSortIcon(field)}`}
-                    />
-                  </Button>
-                </th>
-              ))}
+              {tableColumns?.map(({ field, label, type }) => {
+                if (field === 'id') return;
+                return (
+                  <th key={field} className='text-left p-2'>
+                    <Button
+                      variant='ghost'
+                      className='h-8 pl-0 flex items-center gap-1 font-medium'
+                      onClick={() => {
+                        if (
+                          // added text because of setup in custom-field.tsx
+                          // redundant, will remove in future
+                          type === 'string' ||
+                          type === 'text' ||
+                          type === 'number'
+                        ) {
+                          handleSort(field as SortField);
+                        }
+                      }}
+                    >
+                      {fieldToLabel(label)}
+                      {(type === 'string' ||
+                        type === 'text' ||
+                        type === 'number') && (
+                        <ArrowUpDown
+                          className={`h-4 w-4 transition-all ${getSortIcon(
+                            field as SortField
+                          )}`}
+                        />
+                      )}
+                    </Button>
+                  </th>
+                );
+              })}
               <th className='text-left p-2'></th>
             </tr>
           </thead>
           <tbody>
             {currentItems.map((task, rowIndex) => (
               <tr key={rowIndex} className='border-b border-zinc-200'>
-                <td className='p-2'>{task.title}</td>
-                <td className='p-2'>{task.priority}</td>
-                <td className='p-2'>{task.status}</td>
-                <td className='p-2'>
-                  <TaskActions task={task} />
-                </td>
+                <>
+                  {tableColumns?.map(({ field, label, type, custom }) => {
+                    if (field === 'id') return;
+                    if (type === 'checkbox') {
+                      return (
+                        <td key={field} className='p-2'>
+                          {task[field] ? 'Yes' : 'No'}
+                        </td>
+                      );
+                    }
+                    return (
+                      <td key={field} className='p-2'>
+                        {task[field]}
+                      </td>
+                    );
+                  })}
+                  <td className='p-2'>
+                    <TaskActions task={task} />
+                  </td>
+                </>
               </tr>
             ))}
           </tbody>
@@ -298,7 +359,7 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
       </div>
 
       {/* Add pagination controls */}
-      <div className='flex items-center justify-between pt-4'>
+      <div className='flex items-center justify-between pt-2'>
         <div className='flex items-center gap-2'>
           <span className='text-sm text-gray-600'>Rows per page:</span>
           <Select

@@ -20,15 +20,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { v4 as uuidv4 } from 'uuid';
-
-const formSchema = z.object({
-  id: z.number(),
-  title: z.string().min(1, 'Title is required'),
-  status: z.enum(['not_started', 'in_progress', 'completed']),
-  priority: z.enum(['none', 'low', 'medium', 'high', 'urgent']),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+import { useTaskStore } from '@/lib/store';
+import { fieldToLabel } from '@/lib/utils';
 
 interface TaskFormProps {
   onSubmit: (data: any) => void;
@@ -37,6 +30,7 @@ interface TaskFormProps {
     title: string;
     priority: 'none' | 'low' | 'medium' | 'high' | 'urgent';
     status: 'not_started' | 'in_progress' | 'completed';
+    [key: string]: any;
   };
   submitLabel?: string;
 }
@@ -46,6 +40,27 @@ export default function TaskForm({
   initialData,
   submitLabel = 'Create Task',
 }: TaskFormProps) {
+  const { tableColumns } = useTaskStore();
+  console.log(tableColumns);
+
+  const customColumns = tableColumns?.filter(
+    (column) => column.custom === true
+  );
+
+  const formSchema = z.object({
+    id: z.number(),
+    title: z.string().min(1, 'Title is required'),
+    status: z.enum(['not_started', 'in_progress', 'completed']),
+    priority: z.enum(['none', 'low', 'medium', 'high', 'urgent']),
+    ...(customColumns?.reduce((acc, column) => {
+      // @ts-ignore
+      acc[column.field] = z.string();
+      return acc;
+    }, {}) || {}),
+  });
+
+  type FormValues = z.infer<typeof formSchema>;
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -53,6 +68,11 @@ export default function TaskForm({
       title: '',
       status: 'not_started',
       priority: 'medium',
+      ...(customColumns?.reduce((acc, column) => {
+        // @ts-ignore
+        acc[column.field] = column.defaultValue;
+        return acc;
+      }, {}) || {}),
     },
   });
 
@@ -62,9 +82,20 @@ export default function TaskForm({
     }
   }, [initialData, form]);
 
-  function onSubmitForm(values: FormValues) {
+  function onSubmitForm(values: any) {
     console.log(values);
-    onSubmit(values);
+    const payload = {
+      ...values,
+      ...(customColumns?.reduce((acc, column) => {
+        // @ts-ignore
+        acc[column.field] =
+          column.type === 'number'
+            ? Number(values[column.field])
+            : values[column.field];
+        return acc;
+      }, {}) || {}),
+    };
+    onSubmit(payload);
   }
 
   return (
@@ -137,6 +168,27 @@ export default function TaskForm({
             </FormItem>
           )}
         />
+
+        {customColumns?.map((column) => (
+          <FormField
+            key={column.field}
+            control={form.control}
+            // @ts-ignore
+            name={column.field as string}
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{fieldToLabel(column.field)}</FormLabel>
+                <FormControl>
+                  <Input
+                    placeholder={`Enter ${column.label}`}
+                    type={column.type === 'number' ? 'number' : 'text'}
+                    {...field}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        ))}
 
         <Button type='submit'>{submitLabel}</Button>
       </form>

@@ -7,7 +7,7 @@ import TableHeader from './TableHeader';
 export default function TaskManager({ tasks }: { tasks: any[] }) {
   return (
     <div className='p-4'>
-      <TableHeader />
+      {/* <TableHeader /> */}
       <TaskTable tasks={tasks} />
     </div>
   );
