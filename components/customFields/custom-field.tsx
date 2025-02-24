@@ -61,7 +61,6 @@ export default function CustomFieldForm({
   task: any;
   setOpen: any;
 }) {
-  console.log(setOpen);
   const { addCustomField } = useTaskStore();
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
 

@@ -27,6 +27,7 @@ interface CustomField {
 interface TaskStore {
   tasks: Task[];
   tableColumns: TableColumn[];
+  undoState: any[];
   //customFields: CustomField[];
   initializeTasks: () => void;
   updateTask: (taskId: number, updates: Partial<Task>) => void;
@@ -40,12 +41,16 @@ interface TaskStore {
     type: any
   ) => void;
   deleteCustomField: (fieldName: string) => void;
+  bulkEdit: (taskIds: number[], updates: Partial<Task>) => void;
+  bulkDelete: (taskIds: number[]) => void;
+  executeUndo: () => void;
   //syncTableHeaders: () => void;
 }
 
 export const useTaskStore = create<TaskStore>((set, get) => ({
   tasks: [],
   tableColumns: [],
+  undoState: [],
 
   initializeTasks: () => {
     const existingTasks = localStorage.getItem('tasks');
@@ -169,6 +174,53 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
       localStorage.setItem('tasks', JSON.stringify(updatedTasks));
 
       return { tableColumns: filteredTableColumns, tasks: updatedTasks };
+    });
+  },
+
+  bulkEdit: (taskIds: number[], updates: Partial<Task>) => {
+    set((state) => {
+      if (taskIds.length === 0) {
+        toast.error('No tasks selected', {
+          duration: 3000,
+          closeButton: true,
+        });
+        return { tasks: state.tasks };
+      }
+
+      const updatedTasks = state.tasks.map((task) =>
+        taskIds.includes(task.id) ? { ...task, ...updates } : task
+      );
+
+      localStorage.setItem('tasks', JSON.stringify(updatedTasks));
+      toast.success('Tasks updated', {
+        duration: 3000,
+        closeButton: true,
+      });
+      return { tasks: updatedTasks, undoState: state.tasks };
+    });
+  },
+
+  bulkDelete: (taskIds: number[]) => {
+    set((state) => {
+      const filteredTasks = state.tasks.filter(
+        (task) => !taskIds.includes(task.id)
+      );
+      localStorage.setItem('tasks', JSON.stringify(filteredTasks));
+      toast.success('Tasks deleted', {
+        duration: 3000,
+        closeButton: true,
+      });
+      return { tasks: filteredTasks, undoState: state.tasks };
+    });
+  },
+
+  executeUndo: () => {
+    set((state) => {
+      localStorage.setItem('tasks', JSON.stringify(state.undoState));
+      return {
+        tasks: state.undoState,
+        undoState: [],
+      };
     });
   },
 

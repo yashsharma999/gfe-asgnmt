@@ -57,12 +57,19 @@ interface PaginationState {
 const ALL_FILTER_VALUE = '_all_';
 const statuses = ['Todo', 'In Progress', 'Done'];
 
-export default function TaskTable({ tasks }: { tasks: any[] }) {
+export default function TaskTable({
+  tasks,
+  selectedTasks,
+  setSelectedTasks,
+}: {
+  tasks: any[];
+  selectedTasks: any[];
+  setSelectedTasks: any;
+}) {
   const { tableColumns, updateTask } = useTaskStore();
   const customFields = tableColumns.filter((column) => column.custom === true);
 
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
-  console.log('cols', tableColumns);
   const [sort, setSort] = useState<SortState>({ field: null, direction: null });
   const [filters, setFilters] = useState<FilterState>({
     title: '',
@@ -354,6 +361,14 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
         <table className='min-w-full border-collapse text-sm '>
           <thead>
             <tr className='bg-gray-100 dark:bg-zinc-900'>
+              <th className='text-left p-2'>
+                <Checkbox
+                  checked={selectedTasks.length === tasks.length}
+                  onCheckedChange={(checked: any) =>
+                    setSelectedTasks(checked ? tasks.map((t) => t.id) : [])
+                  }
+                />
+              </th>
               {tableColumns?.map(({ field, label, type }) => {
                 if (field === 'id') return;
                 return (
@@ -409,11 +424,21 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
                   className='border-b border-zinc-200 dark:border-zinc-800'
                 >
                   <>
+                    <td className='p-2'>
+                      <Checkbox
+                        checked={selectedTasks.includes(task.id)}
+                        onCheckedChange={(checked: any) =>
+                          setSelectedTasks((prev: any) =>
+                            checked
+                              ? [...prev, task.id]
+                              : prev.filter((id: any) => id !== task.id)
+                          )
+                        }
+                      />
+                    </td>
                     {tableColumns?.map(({ field, label, type, custom }) => {
                       if (field === 'id') return;
                       if (type === 'checkbox') {
-                        console.log(task[field]);
-
                         return (
                           <td key={field} className='p-2'>
                             {

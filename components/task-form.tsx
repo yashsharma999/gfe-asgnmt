@@ -35,15 +35,16 @@ interface TaskFormProps {
     [key: string]: any;
   };
   submitLabel?: string;
+  bulkEdit?: boolean;
 }
 
 export default function TaskForm({
   onSubmit,
   initialData,
   submitLabel = 'Create Task',
+  bulkEdit = false,
 }: TaskFormProps) {
   const { tableColumns } = useTaskStore();
-  console.log(tableColumns);
 
   const customColumns = tableColumns?.filter(
     (column) => column.custom === true
