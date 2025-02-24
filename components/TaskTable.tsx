@@ -421,7 +421,14 @@ export default function TaskTable({
               currentItems.map((task, rowIndex) => (
                 <tr
                   key={rowIndex}
-                  className='border-b border-zinc-200 dark:border-zinc-800'
+                  className={cn(
+                    'border-b border-zinc-200 dark:border-zinc-800 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-all ease-in-out duration-100',
+                    {
+                      'bg-zinc-100 dark:bg-zinc-900': selectedTasks.includes(
+                        task.id
+                      ),
+                    }
+                  )}
                 >
                   <>
                     <td className='p-2'>
