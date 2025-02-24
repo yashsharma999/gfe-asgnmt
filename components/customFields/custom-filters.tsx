@@ -12,6 +12,7 @@ import { Checkbox } from '../ui/checkbox';
 import { Input } from '../ui/input';
 import { fieldToLabel } from '@/lib/utils';
 import { Separator } from '../ui/separator';
+import { FieldIcon } from '../TaskTable';
 
 export default function CustomFilters({
   setCustomFilters,
@@ -64,7 +65,8 @@ export default function CustomFilters({
             {customFields.map((field) => (
               <DropdownMenuItem key={field.field}>
                 <div className='text-sm flex w-full justify-between items-center'>
-                  <p>{field.label}</p>
+                  <FieldIcon type={field.type} />
+                  <p>{fieldToLabel(field.field)}</p>
                   <Checkbox
                     onClick={(ev) => {
                       ev.stopPropagation();

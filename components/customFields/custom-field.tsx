@@ -21,6 +21,8 @@ import {
 import { useState } from 'react';
 import { useTaskStore } from '@/lib/store';
 import { labelToFieldName } from '@/lib/utils';
+import { toast } from 'sonner';
+import { Checkbox } from '../ui/checkbox';
 
 const formSchema = z.object({
   fieldName: z.string().min(2, 'Field name must be at least 2 characters'),
@@ -113,6 +115,10 @@ export default function CustomFieldForm({
       console.log(error);
     } finally {
       setOpen && setOpen((p: any) => false);
+      toast.success('Field added successfully', {
+        closeButton: true,
+        duration: 5000,
+      });
     }
   }
 
@@ -170,13 +176,21 @@ export default function CustomFieldForm({
                   ) : form.watch('fieldType') === 'number' ? ( //@ts-ignore
                     <Input type='number' {...field} />
                   ) : (
-                    <Input
-                      type='checkbox'
+                    <Checkbox
                       checked={field.value as boolean}
-                      onChange={(e) =>
-                        field.onChange(e.target.checked ? true : false)
+                      onCheckedChange={(checked) =>
+                        field.onChange(checked ? true : false)
                       }
+                      className='ml-2 !mt-0'
                     />
+                    // <Input
+                    //   type='checkbox'
+                    //   className='w-6 h-6 text-black'
+                    //   checked={field.value as boolean}
+                    //   onChange={(e) =>
+                    //     field.onChange(e.target.checked ? true : false)
+                    //   }
+                    // />
                   )}
                   {/* {form.watch('fieldType') === 'number' && (
                   //@ts-ignore

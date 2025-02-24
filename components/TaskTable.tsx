@@ -32,6 +32,7 @@ import { cn, fieldToLabel } from '@/lib/utils';
 import NewTask from './new-task';
 import CustomFieldManager from './customFields/manage-custom-fields';
 import CustomFilters from './customFields/custom-filters';
+import { Separator } from './ui/separator';
 
 type SortDirection = 'asc' | 'desc' | null;
 type SortField = any;
@@ -249,11 +250,16 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
               >
                 Priority
                 {filters.priority.length > 0 && (
-                  <span className='text-xs text-gray-500'>
-                    {filters.priority.length > 0
-                      ? `(${filters.priority.length})`
-                      : ''}
-                  </span>
+                  <>
+                    <Separator orientation='vertical' className='h-4' />
+                    <div className='flex gap-2 '>
+                      {filters.priority.map((priority) => (
+                        <span key={priority} className='text-xs text-gray-500'>
+                          {fieldToLabel(priority)}
+                        </span>
+                      ))}
+                    </div>
+                  </>
                 )}
               </Button>
             </DropdownMenuTrigger>
@@ -277,7 +283,7 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
                       htmlFor={`priority-${priority}`}
                       className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
                     >
-                      {priority}
+                      {fieldToLabel(priority)}
                     </label>
                   </div>
                 ))}
@@ -293,11 +299,16 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
               >
                 Status
                 {filters.status.length > 0 && (
-                  <span className='text-xs text-gray-500'>
-                    {filters.status.length > 0
-                      ? `(${filters.status.length})`
-                      : ''}
-                  </span>
+                  <>
+                    <Separator orientation='vertical' className='h-4' />
+                    <div className='flex gap-2 '>
+                      {filters.status.map((status) => (
+                        <span key={status} className='text-xs text-gray-500'>
+                          {fieldToLabel(status)}
+                        </span>
+                      ))}
+                    </div>
+                  </>
                 )}
               </Button>
             </DropdownMenuTrigger>
@@ -319,7 +330,7 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
                       htmlFor={`status-${status}`}
                       className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
                     >
-                      {status}
+                      {fieldToLabel(status)}
                     </label>
                   </div>
                 ))}
@@ -489,8 +500,9 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
   );
 }
 
-const FieldIcon = ({ type }: { type: string }) => {
-  if (type === 'checkbox') return <SquareCheck className='text-gray-500' />;
+export const FieldIcon = ({ type }: { type: string }) => {
+  if (type === 'checkbox')
+    return <SquareCheck className='text-gray-500 h-4 w-4' />;
   if (type === 'string') return <Text className=' text-gray-500 h-4 w-4' />;
   if (type === 'text') return <Text className=' text-gray-500 h-4 w-4' />;
   if (type === 'number') return <Hash className=' text-gray-500 h-4 w-4' />;

@@ -4,6 +4,8 @@ import { fieldToLabel } from '@/lib/utils';
 import { Button } from '../ui/button';
 import { Trash } from 'lucide-react';
 import ResponsiveDialog from '../ResponsiveDialog';
+import { toast } from 'sonner';
+import { FieldIcon } from '../TaskTable';
 
 export default function CustomFieldLibrary() {
   const { tableColumns } = useTaskStore();
@@ -26,6 +28,7 @@ export default function CustomFieldLibrary() {
           className='border rounded-md py-1 px-2 flex justify-between items-center'
           key={field.field}
         >
+          <FieldIcon type={field.type} />
           <p className='text-sm'>{fieldToLabel(field.field)}</p>
           <DeleteCustomField field={field} />
         </div>
@@ -41,6 +44,10 @@ const DeleteCustomField = ({ field }: { field: any }) => {
   const handleDelete = () => {
     deleteCustomField(field.field);
     setOpen(false);
+    toast.success('Custom field deleted successfully', {
+      closeButton: true,
+      duration: 5000,
+    });
   };
 
   return (

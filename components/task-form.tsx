@@ -22,6 +22,8 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { useTaskStore } from '@/lib/store';
 import { fieldToLabel } from '@/lib/utils';
+import { Checkbox } from './ui/checkbox';
+import { toast } from 'sonner';
 
 interface TaskFormProps {
   onSubmit: (data: any) => void;
@@ -54,7 +56,12 @@ export default function TaskForm({
     priority: z.enum(['none', 'low', 'medium', 'high', 'urgent']),
     ...(customColumns?.reduce((acc, column) => {
       // @ts-ignore
-      acc[column.field] = z.string();
+      acc[column.field] =
+        column.type === 'checkbox'
+          ? z.boolean()
+          : column.type === 'number'
+          ? z.number()
+          : z.string();
       return acc;
     }, {}) || {}),
   });
@@ -83,7 +90,6 @@ export default function TaskForm({
   }, [initialData, form]);
 
   function onSubmitForm(values: any) {
-    console.log(values);
     const payload = {
       ...values,
       ...(customColumns?.reduce((acc, column) => {
@@ -96,6 +102,11 @@ export default function TaskForm({
       }, {}) || {}),
     };
     onSubmit(payload);
+
+    toast.success(`Task ${initialData ? 'updated' : 'created'} successfully`, {
+      closeButton: true,
+      duration: 5000,
+    });
   }
 
   return (
@@ -175,22 +186,42 @@ export default function TaskForm({
             control={form.control}
             // @ts-ignore
             name={column.field as string}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>{fieldToLabel(column.field)}</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder={`Enter ${column.label}`}
-                    type={column.type === 'number' ? 'number' : 'text'}
-                    {...field}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
+            render={({ field }) => {
+              if (column.type === 'checkbox') {
+                return (
+                  <FormItem className='flex items-center gap-2'>
+                    <FormLabel>{fieldToLabel(column.field)}</FormLabel>
+                    <FormControl>
+                      <Checkbox
+                        className='!mt-0'
+                        // @ts-ignore
+                        checked={field.value === true ? true : false}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked);
+                        }}
+                      />
+                    </FormControl>
+                  </FormItem>
+                );
+              }
+              return (
+                <FormItem>
+                  <FormLabel>{fieldToLabel(column.field)}</FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={`Enter ${column.label}`}
+                      type={column.type === 'number' ? 'number' : 'text'}
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              );
+            }}
           />
         ))}
-
-        <Button type='submit'>{submitLabel}</Button>
+        <div className='flex justify-end'>
+          <Button type='submit'>{submitLabel}</Button>
+        </div>
       </form>
     </Form>
   );
