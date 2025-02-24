@@ -1,6 +1,14 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button';
-import { ArrowUpDown, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import {
+  SquareCheck,
+  ArrowUpDown,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Text,
+  Hash,
+} from 'lucide-react';
 import TaskActions from './TaskActions';
 import { Input } from './ui/input';
 import {
@@ -20,7 +28,7 @@ import {
 import { useStore } from 'zustand';
 import { useTaskStore } from '@/lib/store';
 import { boolean } from 'zod';
-import { fieldToLabel } from '@/lib/utils';
+import { cn, fieldToLabel } from '@/lib/utils';
 import NewTask from './new-task';
 import CustomFieldManager from './customFields/manage-custom-fields';
 import CustomFilters from './customFields/custom-filters';
@@ -217,6 +225,10 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
   return (
     <div className='space-y-2'>
       <div className='flex flex-col md:flex-row md:justify-between md:items-center'>
+        <div className='gap-2 flex-wrap flex md:hidden'>
+          <NewTask />
+          <CustomFieldManager />
+        </div>
         <div className='flex gap-2 items-center flex-wrap'>
           <div className=''>
             <Input
@@ -315,7 +327,7 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <div className='flex gap-2'>
+        <div className='gap-2 flex-wrap hidden md:flex'>
           <NewTask />
           <CustomFieldManager />
         </div>
@@ -327,8 +339,8 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
         setSelectedFields={setSelectedFields}
       />
 
-      <div className='rounded-md overflow-hidden border border-zinc-200'>
-        <table className='min-w-full border-collapse text-sm'>
+      <div className='rounded-md overflow-x-auto border border-zinc-200'>
+        <table className='min-w-full border-collapse text-sm '>
           <thead>
             <tr className='bg-gray-100'>
               {tableColumns?.map(({ field, label, type }) => {
@@ -337,7 +349,7 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
                   <th key={field} className='text-left p-2'>
                     <Button
                       variant='ghost'
-                      className='h-8 pl-0 flex items-center gap-1 font-medium'
+                      className='h-8 pl-0 !text-xs text-gray-600 flex items-center gap-1 '
                       onClick={() => {
                         if (
                           // added text because of setup in custom-field.tsx
@@ -350,6 +362,7 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
                         }
                       }}
                     >
+                      {<FieldIcon type={type} />}
                       {fieldToLabel(label)}
                       {(type === 'string' ||
                         type === 'text' ||
@@ -368,47 +381,67 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
             </tr>
           </thead>
           <tbody>
-            {currentItems.map((task, rowIndex) => (
-              <tr key={rowIndex} className='border-b border-zinc-200'>
-                <>
-                  {tableColumns?.map(({ field, label, type, custom }) => {
-                    if (field === 'id') return;
-                    if (type === 'checkbox') {
-                      console.log(task[field]);
+            {currentItems?.length === 0 && (
+              <tr>
+                <td
+                  colSpan={tableColumns.length + 1}
+                  className='text-center p-4'
+                >
+                  No tasks found
+                </td>
+              </tr>
+            )}
+            {currentItems?.length > 0 &&
+              currentItems.map((task, rowIndex) => (
+                <tr key={rowIndex} className='border-b border-zinc-200'>
+                  <>
+                    {tableColumns?.map(({ field, label, type, custom }) => {
+                      if (field === 'id') return;
+                      if (type === 'checkbox') {
+                        console.log(task[field]);
 
+                        return (
+                          <td key={field} className='p-2'>
+                            {
+                              <Checkbox
+                                checked={task[field]}
+                                onCheckedChange={(checked: any) =>
+                                  updateTask(task.id, {
+                                    [field]: checked,
+                                  })
+                                }
+                              />
+                            }
+                          </td>
+                        );
+                      }
                       return (
-                        <td key={field} className='p-2'>
-                          {
-                            <Checkbox
-                              checked={task[field]}
-                              onCheckedChange={(checked: any) =>
-                                updateTask(task.id, {
-                                  [field]: checked,
-                                })
-                              }
-                            />
-                          }
+                        <td
+                          key={field}
+                          className={cn(`p-2`, {
+                            'font-semibold': field === 'title',
+                          })}
+                        >
+                          <FieldLabel
+                            field={field}
+                            label={task[field]}
+                            type={type}
+                          />
                         </td>
                       );
-                    }
-                    return (
-                      <td key={field} className='p-2'>
-                        {task[field]}
-                      </td>
-                    );
-                  })}
-                  <td className='p-2'>
-                    <TaskActions task={task} />
-                  </td>
-                </>
-              </tr>
-            ))}
+                    })}
+                    <td className='p-2'>
+                      <TaskActions task={task} />
+                    </td>
+                  </>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
 
       {/* Add pagination controls */}
-      <div className='flex items-center justify-between pt-2'>
+      <div className='flex flex-col sm:flex-row gap-2 items-center justify-between pt-2'>
         <div className='flex items-center gap-2'>
           <span className='text-sm text-gray-600'>Rows per page:</span>
           <Select
@@ -455,3 +488,31 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
     </div>
   );
 }
+
+const FieldIcon = ({ type }: { type: string }) => {
+  if (type === 'checkbox') return <SquareCheck className='text-gray-500' />;
+  if (type === 'string') return <Text className=' text-gray-500 h-4 w-4' />;
+  if (type === 'text') return <Text className=' text-gray-500 h-4 w-4' />;
+  if (type === 'number') return <Hash className=' text-gray-500 h-4 w-4' />;
+  return <div className=' bg-zinc-200 rounded-full'></div>;
+};
+
+const FieldLabel = ({
+  field,
+  label,
+  type,
+}: {
+  field: string;
+  label: string;
+  type: string;
+}) => {
+  if (field === 'title') {
+    return <span>{label}</span>;
+  }
+
+  return (
+    <div className='flex items-center gap-1'>
+      <span>{fieldToLabel(label)}</span>
+    </div>
+  );
+};

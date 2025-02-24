@@ -40,7 +40,7 @@ export default function ResponsiveDialog({
         onOpenChange={setOpen}
         aria-labelledby='responsive-dialog-title'
       >
-        <DialogContent>
+        <DialogContent className='max-h-[90vh] overflow-y-auto'>
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
             <DialogDescription>{description ?? ''}</DialogDescription>

@@ -10,7 +10,11 @@ export function labelToFieldName(label: string) {
 }
 
 export function fieldToLabel(field: string) {
-  return field
-    .replace(/_/g, ' ')
-    .replace(/\b\w/g, (char) => char.toUpperCase());
+  if (typeof field === 'string') {
+    return field
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, (char) => char.toUpperCase());
+  } else {
+    return field;
+  }
 }

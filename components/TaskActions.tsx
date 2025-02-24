@@ -6,7 +6,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { Button } from './ui/button';
-import { Ellipsis, Plus } from 'lucide-react';
+import { Ellipsis, Pencil, Plus, Trash } from 'lucide-react';
 import { useTaskStore } from '@/lib/store';
 import ResponsiveDialog from './ResponsiveDialog';
 import TaskForm from './task-form';
@@ -53,8 +53,18 @@ export default function TaskActions({ task }: TaskActionsProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align='end'>
-          <DropdownMenuItem onClick={handleEdit}>Edit</DropdownMenuItem>
-          <DropdownMenuItem onClick={handleDelete}>Delete</DropdownMenuItem>
+          <DropdownMenuItem onClick={handleEdit}>
+            <span>
+              <Pencil />
+            </span>
+            Edit
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={handleDelete}>
+            <span>
+              <Trash />
+            </span>
+            Delete
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setCustomFieldDialogOpen(true)}>
             <span>
               <Plus />
