@@ -23,6 +23,7 @@ import { boolean } from 'zod';
 import { fieldToLabel } from '@/lib/utils';
 import NewTask from './new-task';
 import CustomFieldManager from './customFields/manage-custom-fields';
+import CustomFilters from './customFields/custom-filters';
 
 type SortDirection = 'asc' | 'desc' | null;
 type SortField = any;
@@ -36,6 +37,7 @@ interface FilterState {
   title: string;
   priority: string[];
   status: string[];
+  [key: string]: string | string[];
 }
 
 interface PaginationState {
@@ -47,7 +49,10 @@ const ALL_FILTER_VALUE = '_all_';
 const statuses = ['Todo', 'In Progress', 'Done'];
 
 export default function TaskTable({ tasks }: { tasks: any[] }) {
-  const { tableColumns } = useTaskStore();
+  const { tableColumns, updateTask } = useTaskStore();
+  const customFields = tableColumns.filter((column) => column.custom === true);
+
+  const [selectedFields, setSelectedFields] = useState<string[]>([]);
   console.log('cols', tableColumns);
   const [sort, setSort] = useState<SortState>({ field: null, direction: null });
   const [filters, setFilters] = useState<FilterState>({
@@ -55,6 +60,7 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
     priority: [],
     status: [],
   });
+  const [customFilters, setCustomFilters] = useState<FilterState>();
   const [pagination, setPagination] = useState<PaginationState>({
     currentPage: 1,
     pageSize: 10,
@@ -90,6 +96,28 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
       filters.status.length === 0 ||
       filters.status.includes(task.status.toLowerCase());
 
+    if (
+      selectedFields.length > 0 &&
+      customFilters &&
+      Object.keys(customFilters).length > 0
+    ) {
+      const matchesCustomFilters = Object.entries(customFilters).every(
+        ([field, value]) => {
+          if (typeof value === 'string') {
+            return task[field].toLowerCase().includes(value.toLowerCase());
+          } else if (typeof value === 'number') {
+            return task[field] === value;
+          } else if (typeof value === 'boolean') {
+            return task[field] === value;
+          }
+          return true;
+        }
+      );
+
+      return (
+        matchesTitle && matchesPriority && matchesStatus && matchesCustomFilters
+      );
+    }
     return matchesTitle && matchesPriority && matchesStatus;
   });
 
@@ -293,6 +321,12 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
         </div>
       </div>
 
+      <CustomFilters
+        setCustomFilters={setCustomFilters}
+        selectedFields={selectedFields}
+        setSelectedFields={setSelectedFields}
+      />
+
       <div className='rounded-md overflow-hidden border border-zinc-200'>
         <table className='min-w-full border-collapse text-sm'>
           <thead>
@@ -340,9 +374,20 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
                   {tableColumns?.map(({ field, label, type, custom }) => {
                     if (field === 'id') return;
                     if (type === 'checkbox') {
+                      console.log(task[field]);
+
                       return (
                         <td key={field} className='p-2'>
-                          {task[field] ? 'Yes' : 'No'}
+                          {
+                            <Checkbox
+                              checked={task[field]}
+                              onCheckedChange={(checked: any) =>
+                                updateTask(task.id, {
+                                  [field]: checked,
+                                })
+                              }
+                            />
+                          }
                         </td>
                       );
                     }

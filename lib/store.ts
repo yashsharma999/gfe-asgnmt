@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import tasks from './greatfrontend-tasks.json';
 import tableColumns from './table-columns.json';
+import { toast } from 'sonner';
 interface Task {
   id: number;
   title: string;
@@ -100,6 +101,20 @@ export const useTaskStore = create<TaskStore>((set, get) => ({
     type: any
   ) => {
     set((state) => {
+      const tableColumns = get().tableColumns;
+      const existingField = tableColumns.find(
+        (column) => column.field.toLowerCase() === fieldName.toLowerCase()
+      );
+
+      if (existingField) {
+        toast.error('Field already exists', {
+          description: 'Please choose a different field name',
+          duration: 3000,
+          closeButton: true,
+        });
+        return { tasks: state.tasks, tableColumns: state.tableColumns };
+      }
+
       let updatedTasks: Task[] = [];
       if (taskId) {
         updatedTasks = state.tasks.map((task) =>
