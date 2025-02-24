@@ -80,7 +80,7 @@ export default function TaskActions({ task }: TaskActionsProps) {
         open={customFieldDialogOpen}
         setOpen={setCustomFieldDialogOpen}
       >
-        <CustomFieldForm task={task} />
+        <CustomFieldForm task={task} setOpen={setCustomFieldDialogOpen} />
       </ResponsiveDialog>
     </>
   );

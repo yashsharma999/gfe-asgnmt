@@ -2,7 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CustomFieldForm from './custom-field';
 import CustomFieldLibrary from './custom-field-lib';
 
-export default function Interface() {
+export default function Interface({ setOpen }: { setOpen: any }) {
   return (
     <div>
       <Tabs defaultValue='library'>
@@ -14,7 +14,7 @@ export default function Interface() {
           <CustomFieldLibrary />
         </TabsContent>
         <TabsContent value='new'>
-          <CustomFieldForm task={null} />
+          <CustomFieldForm task={null} setOpen={setOpen} />
         </TabsContent>
       </Tabs>
     </div>

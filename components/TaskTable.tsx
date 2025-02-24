@@ -94,25 +94,29 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
   });
 
   const sortedAndFilteredTasks = filteredTasks.sort((a, b) => {
-    if (!sort.field || !sort.direction) return 0;
+    try {
+      if (!sort.field || !sort.direction) return 0;
 
-    if (sort.field === 'priority') {
-      const aValue = getPriorityValue(a[sort.field]);
-      const bValue = getPriorityValue(b[sort.field]);
-      return sort.direction === 'asc' ? aValue - bValue : bValue - aValue;
-    }
+      if (sort.field === 'priority') {
+        const aValue = getPriorityValue(a[sort.field]);
+        const bValue = getPriorityValue(b[sort.field]);
+        return sort.direction === 'asc' ? aValue - bValue : bValue - aValue;
+      }
 
-    const aValue = a[sort.field];
-    const bValue = b[sort.field];
+      const aValue = a[sort.field];
+      const bValue = b[sort.field];
 
-    // handle number sorting
-    if (typeof aValue === 'number' && typeof bValue === 'number') {
-      return sort.direction === 'asc' ? aValue - bValue : bValue - aValue;
-    }
-    if (sort.direction === 'asc') {
-      return aValue.localeCompare(bValue);
-    } else {
-      return bValue.localeCompare(aValue);
+      // handle number sorting
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return sort.direction === 'asc' ? aValue - bValue : bValue - aValue;
+      }
+      if (sort.direction === 'asc') {
+        return aValue?.localeCompare(bValue);
+      } else {
+        return bValue?.localeCompare(aValue);
+      }
+    } catch (err) {
+      console.log(err);
     }
   });
 

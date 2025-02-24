@@ -10,6 +10,15 @@ export default function CustomFieldLibrary() {
 
   const customFields = tableColumns.filter((column) => column.custom === true);
   console.log(customFields);
+
+  if (customFields.length === 0) {
+    return (
+      <div className='flex flex-col gap-2 p-4 px-0'>
+        <p className='text-sm text-zinc-500'>No custom fields found</p>
+      </div>
+    );
+  }
+
   return (
     <div className='flex flex-col gap-2'>
       {customFields.map((field) => (

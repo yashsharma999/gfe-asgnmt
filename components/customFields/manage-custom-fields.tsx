@@ -32,7 +32,7 @@ export default function CustomFieldManager() {
         open={open}
         setOpen={setOpen}
       >
-        <Interface />
+        <Interface setOpen={setOpen} />
       </ResponsiveDialog>
     </div>
   );

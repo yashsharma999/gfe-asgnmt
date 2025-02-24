@@ -52,7 +52,14 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export default function CustomFieldForm({ task }: { task: any }) {
+export default function CustomFieldForm({
+  task,
+  setOpen,
+}: {
+  task: any;
+  setOpen: any;
+}) {
+  console.log(setOpen);
   const { addCustomField } = useTaskStore();
   const [selectedTaskId, setSelectedTaskId] = useState<number | null>(null);
 
@@ -76,33 +83,37 @@ export default function CustomFieldForm({ task }: { task: any }) {
   };
 
   function onSubmit(values: FormValues) {
-    const payload = {
-      ...values,
-      fieldName: labelToFieldName(values.fieldName),
-      defaultValue: handleDefaultValues(values.fieldType),
-      // handle edge case where checkbox is selected but no value is provided
-      ...(values.fieldType === 'checkbox' &&
-        values.fieldValue === '' && {
-          fieldValue: false,
+    try {
+      const payload = {
+        ...values,
+        fieldName: labelToFieldName(values.fieldName),
+        defaultValue: handleDefaultValues(values.fieldType),
+        // handle edge case where checkbox is selected but no value is provided
+        ...(values.fieldType === 'checkbox' &&
+          values.fieldValue === '' && {
+            fieldValue: false,
+          }),
+        // Ensure fieldValue is a Number if fieldType is 'number'
+        ...(values.fieldType === 'number' && {
+          fieldValue: Number(values.fieldValue),
         }),
-      // Ensure fieldValue is a Number if fieldType is 'number'
-      ...(values.fieldType === 'number' && {
-        fieldValue: Number(values.fieldValue),
-      }),
-    };
+      };
 
-    console.log(payload);
+      addCustomField(
+        task?.id ?? null,
+        payload.fieldName,
+        payload.fieldValue,
+        // if task is not null, use the defaultValue, otherwise use the fieldValue
+        task?.id ? payload.defaultValue : payload.fieldValue,
+        payload.fieldType
+      );
 
-    addCustomField(
-      task?.id ?? null,
-      payload.fieldName,
-      payload.fieldValue,
-      // if task is not null, use the defaultValue, otherwise use the fieldValue
-      task?.id ? payload.defaultValue : payload.fieldValue,
-      payload.fieldType
-    );
-
-    form.reset();
+      form.reset();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setOpen && setOpen((p: any) => false);
+    }
   }
 
   return (
