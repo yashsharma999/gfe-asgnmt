@@ -238,7 +238,7 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
               onChange={(e) =>
                 setFilters((prev) => ({ ...prev, title: e.target.value }))
               }
-              className='max-w-[200px] h-8 text-sm'
+              className='max-w-[200px] h-8 text-sm focus-visible:ring-1 focus-visible:ring-zinc-300 focus-visible:outline-none'
             />
           </div>
 
@@ -246,7 +246,7 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
             <DropdownMenuTrigger asChild>
               <Button
                 variant='outline'
-                className='h-8 w-fit text-center border-dashed border-zinc-300'
+                className='h-8 w-fit text-center border-dashed border-zinc-300 dark:border-zinc-700'
               >
                 Priority
                 {filters.priority.length > 0 && (
@@ -263,7 +263,7 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className='w-[180px] p-2'>
+            <DropdownMenuContent align='start' className='w-[180px] p-2'>
               <div className='space-y-2'>
                 {priorities.map((priority) => (
                   <div key={priority} className='flex items-center space-x-2'>
@@ -295,7 +295,7 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
             <DropdownMenuTrigger asChild>
               <Button
                 variant='outline'
-                className='h-8 w-fit justify-between border-dashed border-zinc-300'
+                className='h-8 w-fit justify-between border-dashed border-zinc-300 dark:border-zinc-700'
               >
                 Status
                 {filters.status.length > 0 && (
@@ -312,7 +312,7 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className='w-[180px] p-2'>
+            <DropdownMenuContent align='start' className='w-[180px] p-2'>
               <div className='space-y-2'>
                 {statuses.map((status) => (
                   <div key={status} className='flex items-center space-x-2'>
@@ -350,10 +350,10 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
         setSelectedFields={setSelectedFields}
       />
 
-      <div className='rounded-md overflow-x-auto border border-zinc-200'>
+      <div className='rounded-md overflow-x-auto border border-zinc-200 dark:border-zinc-800'>
         <table className='min-w-full border-collapse text-sm '>
           <thead>
-            <tr className='bg-gray-100'>
+            <tr className='bg-gray-100 dark:bg-zinc-900'>
               {tableColumns?.map(({ field, label, type }) => {
                 if (field === 'id') return;
                 return (
@@ -404,7 +404,10 @@ export default function TaskTable({ tasks }: { tasks: any[] }) {
             )}
             {currentItems?.length > 0 &&
               currentItems.map((task, rowIndex) => (
-                <tr key={rowIndex} className='border-b border-zinc-200'>
+                <tr
+                  key={rowIndex}
+                  className='border-b border-zinc-200 dark:border-zinc-800'
+                >
                   <>
                     {tableColumns?.map(({ field, label, type, custom }) => {
                       if (field === 'id') return;

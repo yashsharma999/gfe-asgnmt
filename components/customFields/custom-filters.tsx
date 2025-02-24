@@ -97,7 +97,7 @@ export default function CustomFilters({
                 <Input
                   placeholder={`Filter by ${fieldData?.label}`}
                   key={field}
-                  className='h-6 bg-slate-100 text-sm max-w-[150px]'
+                  className='h-6 bg-slate-100 dark:bg-zinc-900 text-sm max-w-[150px] focus-visible:ring-1 focus-visible:ring-zinc-300 focus-visible:outline-none'
                   onChange={(e) => {
                     setCustomFilters((prev: any) => ({
                       ...prev,
@@ -119,7 +119,7 @@ export default function CustomFilters({
                   placeholder={`Filter by number ${fieldData?.label}`}
                   key={field}
                   type='number'
-                  className='h-6 bg-slate-100 text-sm max-w-[100px]'
+                  className='h-6 bg-slate-100 dark:bg-zinc-900 text-sm max-w-[100px] focus-visible:ring-1 focus-visible:ring-zinc-300 focus-visible:outline-none'
                   defaultValue={0}
                   onChange={(e) => {
                     setCustomFilters((prev: any) => ({
@@ -168,7 +168,7 @@ const CustomFilterWrapper = ({
   setSelectedFields: any;
 }) => {
   return (
-    <div className='relative border border-dashed border-zinc-300 rounded-md flex justify-center p-[2px] px-2 items-center gap-2'>
+    <div className='relative border border-dashed border-zinc-300 dark:border-zinc-700 rounded-md flex justify-center p-[2px] px-2 items-center gap-2'>
       <p className='text-xs text-zinc-500'>{fieldToLabel(label)}</p>
       <Separator orientation='vertical' className='h-[80%]' />
       {children}
@@ -185,7 +185,7 @@ const CustomFilterWrapper = ({
         }}
         className='absolute top-[-8px] right-[-8px] bg-white border border-zinc-300 rounded-full text-xs p-[2px] h-4 w-4 flex items-center justify-center'
       >
-        <X className='w-3 h-3' />
+        <X className='w-3 h-3 dark:text-zinc-800' />
       </button>
     </div>
   );

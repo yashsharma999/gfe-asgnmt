@@ -14,7 +14,6 @@ export default function Home() {
 
   return (
     <section>
-      {/* <ModeToggle /> */}
       <div className='max-w-7xl mx-auto'>
         <TaskManager tasks={tasks} />
       </div>
